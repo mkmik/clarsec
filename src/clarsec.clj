@@ -10,6 +10,8 @@
 			     :value value
 			     :rest rest})
 
+(defn failback [v f] (if (nil? v) f v))
+
 (defmonad parser-m 
   [m-result (fn m-result-parser [x] (fn [strn] (consumed x strn)))
    m-bind (fn m-bind-parser [parser func]
@@ -21,6 +23,15 @@
 		))))
 
    m-zero (fn [strn] (failed))
+   
+   m-plus (fn [& parsers]
+	    (fn [strn]
+	      (failback
+	       (first
+		(drop-while failed?
+			    (map #(% strn) parsers)))
+	       (failed)
+	       )))
    
    ]
 )
@@ -45,6 +56,15 @@
 	   (apply str x))
 )
 
+(defmonadfn optional [parser]
+  (m-plus parser (m-result (failed))))
+
+;(defmonadfn <|> [& args] 
+; (apply m-plus args))
+
+(defmacro <|> [& args]
+  (cons 'm-plus args)
+)
 
 (defmonadfn body [] 
   (domonad [x any-char
@@ -52,7 +72,8 @@
 )
 
 (defmonadfn body2 [] 
-  (m-seq [any-char any-char any-char])
+  (domonad [x (<|> (string "ciao") (string "ugo"))]
+	   x)
 )
 
 
