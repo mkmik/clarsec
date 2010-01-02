@@ -41,7 +41,7 @@
 	   (str c)))
 
 (defmonadfn string [strn]
-  (domonad [x (m-seq (map (fn [x] (is-char x)) strn))]
+  (domonad [x (m-seq (map is-char strn))]
 	   (apply str x))
 )
 
