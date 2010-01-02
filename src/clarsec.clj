@@ -81,7 +81,10 @@
       (let [str-chars (into #{} target-strn)]
            (char-test #(contains? str-chars %))))
 
-(defmonadfn space []
+
+(defn alpha [] (one-of "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+
+(defn space []
   (one-of " \n")
 )
 
@@ -113,9 +116,9 @@
 
 
 (defn mytest [n] 
-  (parse #(string "ciao") n)
+  (parse body2 n)
 )
 
 (defn -main []
-  (println (mytest "ciao mondo"))
+  (println (mytest "ciao mondomondo"))
 )
