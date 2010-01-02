@@ -32,6 +32,8 @@
 	      (. strn (substring 1))))
   )
 
+(defmonadfn is-char [c]
+      (char-test (partial = c)))
 
 (defmonadfn satisfy [pred]
   (domonad [c any-char
@@ -39,11 +41,10 @@
 	   (str c)))
 
 (defmonadfn string [strn]
-  (domonad [x (m-seq (map (fn [x] any-char) strn))]
+  (domonad [x (m-seq (map (fn [x] (is-char x)) strn))]
 	   (apply str x))
-	  
-  ; (m-seq [any-char any-char])
 )
+
 
 (defmonadfn body [] 
   (domonad [x any-char
