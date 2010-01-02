@@ -41,7 +41,17 @@
 	    y any-char] (str y x))
 )
 
+(defmonadfn body2 [] 
+  (m-seq [any-char any-char any-char])
+)
 
-(defn mytest [ n] 
+
+(defn mytest [n] 
   (with-monad parser-m ((body) n)
     ))
+
+(defmacro parse [p i]
+  (list 'with-monad 'parser-m (list (list p) i))
+)
+
+
