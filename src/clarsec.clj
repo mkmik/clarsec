@@ -77,6 +77,18 @@
 	   (if (nil? x) [] x))
 )
 
+(defn one-of [target-strn]
+      (let [str-chars (into #{} target-strn)]
+           (char-test #(contains? str-chars %))))
+
+(defmonadfn space []
+  (one-of " \n")
+)
+
+(defmonadfn spaces [] 
+  (many (space))
+  )
+
 (defmacro <|> [& args]
   (cons 'm-plus args)
 )
@@ -88,7 +100,7 @@
 
 (defmonadfn body2 [] 
   (domonad [x (<|> (string "ciao") (string "ugo"))
-	    y (optional (is-char \space))
+	    y (spaces)
 	    z (many (string "mondo"))]
 	   z)
 )
