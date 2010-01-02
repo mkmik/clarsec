@@ -43,6 +43,12 @@
 	      (. strn (substring 1))))
   )
 
+(defn char-test [pred]
+      (domonad parser-m
+               [c any-char
+                :when (pred c)]
+               (str c)))
+
 (defmonadfn is-char [c]
       (char-test (partial = c)))
 
@@ -59,8 +65,17 @@
 (defmonadfn optional [parser]
   (m-plus parser (m-result (failed))))
 
-;(defmonadfn <|> [& args] 
-; (apply m-plus args))
+
+(defmonadfn many1 [parser] 
+  (domonad [a parser
+	    as (optional (many1 parser))]
+	   (concat [a] (if (failed? as) [] as)))
+  )
+
+(defmonadfn many [parser]
+  (domonad [x (optional (many1 parser))]
+	   (if (failed? x) [] x))
+)
 
 (defmacro <|> [& args]
   (cons 'm-plus args)
@@ -72,8 +87,10 @@
 )
 
 (defmonadfn body2 [] 
-  (domonad [x (<|> (string "ciao") (string "ugo"))]
-	   x)
+  (domonad [x (<|> (string "ciao") (string "ugo"))
+	    y (optional (is-char \space))
+	    z (many (string "mondo"))]
+	   z)
 )
 
 
