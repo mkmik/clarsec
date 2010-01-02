@@ -63,18 +63,18 @@
 )
 
 (defmonadfn optional [parser]
-  (m-plus parser (m-result (failed))))
+  (m-plus parser (m-result nil)))
 
 
 (defmonadfn many1 [parser] 
   (domonad [a parser
 	    as (optional (many1 parser))]
-	   (concat [a] (if (failed? as) [] as)))
+	   (concat [a] (if (nil? as) [] as)))
   )
 
 (defmonadfn many [parser]
   (domonad [x (optional (many1 parser))]
-	   (if (failed? x) [] x))
+	   (if (nil? x) [] x))
 )
 
 (defmacro <|> [& args]
