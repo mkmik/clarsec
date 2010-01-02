@@ -11,7 +11,7 @@
 			     :rest rest})
 
 (defmonad parser-m 
-  [m-result (fn m-result-parser [x] (fn [str] (consumed  x str)))
+  [m-result (fn m-result-parser [x] (fn [strn] (consumed x strn)))
    m-bind (fn m-bind-parser [parser func]
 	    (fn [strn]
 	      (let [result (parser strn)]
@@ -38,9 +38,9 @@
 	    :when (pred c)]
 	   (str c)))
 
-(defmonadfn string [str]
-  (domonad [x (m-seq (map (fn [x] any-char) str))]
-	   "ciao")
+(defmonadfn string [strn]
+  (domonad [x (m-seq (map (fn [x] any-char) strn))]
+	   (apply str x))
 	  
   ; (m-seq [any-char any-char])
 )
@@ -55,12 +55,16 @@
 )
 
 
-(defn mytest [n] 
-  (with-monad parser-m ((body) n)
-    ))
-
 (defmacro parse [p i]
   (list 'with-monad 'parser-m (list (list p) i))
 )
 
 
+
+(defn mytest [n] 
+  (parse #(string "ciao") n)
+)
+
+(defn -main []
+  (println (mytest "ciao mondo"))
+)
