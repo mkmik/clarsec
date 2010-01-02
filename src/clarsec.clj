@@ -11,9 +11,7 @@
 			     :rest rest})
 
 (defmonad parser-m 
-  [m-result (fn m-result-parser [x] (fn [str] {:type :consumed
-			       :value x
-			       :rest str}))
+  [m-result (fn m-result-parser [x] (fn [str] (consumed  x str)))
    m-bind (fn m-bind-parser [parser func]
 	    (fn [strn]
 	      (let [result (parser strn)]
@@ -24,17 +22,28 @@
 
    m-zero (fn [strn] (failed))
    
-   m-plus (fn [& parsers] (println "ciao" parsers))
    ]
 )
 
 (defmonadfn any-char [strn]
-      (if (= "" strn)
-          (failed)
-	  (consumed (first strn)
-		    (. strn (substring 1))))
-)
+  (if (= "" strn)
+    (failed)
+    (consumed (first strn)
+	      (. strn (substring 1))))
+  )
 
+
+(defmonadfn satisfy [pred]
+  (domonad [c any-char
+	    :when (pred c)]
+	   (str c)))
+
+(defmonadfn string [str]
+  (domonad [x (m-seq (map (fn [x] any-char) str))]
+	   "ciao")
+	  
+  ; (m-seq [any-char any-char])
+)
 
 (defmonadfn body [] 
   (domonad [x any-char
