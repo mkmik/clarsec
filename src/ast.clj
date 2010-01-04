@@ -35,3 +35,9 @@
 
 (defn make-xpath-expression [ex]
   {:type 'XPathPredicate :expression ex})
+
+(defn make-decl-init [typ name e]
+  {:type 'DeclInit :type typ :name name :expression e})
+
+(defn make-assign [name e]
+  {:type 'Assign :name name :expression e})

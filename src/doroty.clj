@@ -44,8 +44,22 @@
 		(result (make-call target method args))))
 
 
+(defn decl [typ]
+  (let-bind [name identifier
+	     _    (symb "=")
+	     e    expression]
+	    (result (make-decl-init typ name e))))
+
+(defn assign [name]
+  (let-bind [_ (symb "=")
+	     e expression]
+	    (result (make-assign name e))))
+
 (def predecl
-     (string "undef"))
+     (let-bind [name identifier]
+	       (either (decl name) (assign name))))
+
+
 
 (def tagname (either (symb ".")
 		     (let-bind [attr (option "" (string "@"))
@@ -68,8 +82,7 @@
 
 (def xpath
      (>>== (sepBy tagexp (string "/"))
-	   make-xpath)
-)
+	   make-xpath))
 
 (def fieldList
      (sepBy identifier comma))
