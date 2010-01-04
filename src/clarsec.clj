@@ -1,124 +1,70 @@
 (ns clarsec
   (:gen-class)
-  (:use [clojure.contrib.monads]))
+  (:use [monad]
+	[de.kotka.monad]))
 
-(defn consumed? [x]  (= (:type x) :consumed)) 
-(defn failed? [x]  (= (:type x) :failed)) 
+
+(defn consumed? [x]  (= (x :type) :consumed)) 
+(defn failed? [x]  (= (x :type) :failed)) 
 
 (defn failed [] {:type :failed})
 (defn consumed [value rest] {:type :consumed
 			     :value value
 			     :rest rest})
 
-(defn failback [v f] (if (nil? v) f v))
-
-(defmonad parser-m 
-  [m-result (fn m-result-parser [x] (fn [strn] (consumed x strn)))
-   m-bind (fn m-bind-parser [parser func]
-	    (fn [strn]
-	      (let [result (parser strn)]
-		(if (consumed? result)
-		  ((func (:value result)) (:rest result))
-		  result
-		))))
-
-   m-zero (fn [strn] (failed))
-   
-   m-plus (fn [& parsers]
-	    (fn [strn]
-	      (failback
-	       (first
-		(drop-while failed?
-			    (map #(% strn) parsers)))
-	       (failed)
-	       )))
-   
-   ]
-)
-
-(defmonadfn any-char [strn]
-  (if (= "" strn)
-    (failed)
-    (consumed (first strn)
-	      (. strn (substring 1))))
-  )
-
-(defn char-test [pred]
-      (domonad parser-m
-               [c any-char
-                :when (pred c)]
-               (str c)))
-
-(defmonadfn is-char [c]
-      (char-test (partial = c)))
-
-(defmonadfn satisfy [pred]
-  (domonad [c any-char
-	    :when (pred c)]
-	   (str c)))
-
-(defmonadfn string [strn]
-  (domonad [x (m-seq (map is-char strn))]
-	   (apply str x))
-)
-
-(defmonadfn optional [parser]
-  (m-plus parser (m-result nil)))
 
 
-(defmonadfn many1 [parser] 
-  (domonad [a parser
-	    as (optional (many1 parser))]
-	   (concat [a] (if (nil? as) [] as)))
-  )
 
-(defmonadfn many [parser]
-  (domonad [x (optional (many1 parser))]
-	   (if (nil? x) [] x))
-)
+(declare Parser)
 
-(defn one-of [target-strn]
-      (let [str-chars (into #{} target-strn)]
-           (char-test #(contains? str-chars %))))
+(derive 'clarsec/Parser 'de.kotka.monad/Monad)
 
 
-(defn alpha [] (one-of "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+(defmethod return 'Parser
+  [t x]
+  (make-monad t (fn p-return [strn] (consumed x strn))))
+ 
 
-(defn space []
-  (one-of " \n")
-)
+(defmethod bind 'Parser
+  [m func] 
+;  (println "binding" m)
+  (make-monad (monad-type m) 
+	      (fn [strn] 
+		(let [parser (monad m)
+		      result (parser strn)]		  
+		  (if (consumed? result)
+		    ((monad (func (:value result))) (:rest result))
+		    result
+		    )
+		  )
+		)))
 
-(defmonadfn spaces [] 
-  (many (space))
-  )
+;;
 
-(defmacro <|> [& args]
-  (cons 'm-plus args)
-)
+(def any-char
+  (make-monad 'Parser
+	      (fn p-any-char [strn]
+		(if (= "" strn)
+		  (failed)
+		  (consumed (first strn)
+			    (. strn (substring 1))))
+		)
+	      ))
 
-(defmonadfn body [] 
-  (domonad [x any-char
-	    y any-char] (str y x))
-)
+(def fail-char
+     (make-monad 'Parser 
+		 (fn p-fail-char [strn]
+		   (failed))))
+  
 
-(defmonadfn body2 [] 
-  (domonad [x (<|> (string "ciao") (string "ugo"))
-	    y (spaces)
-	    z (many (string "mondo"))]
-	   z)
+;(def myparser 
+;     (let-bind [x (return 'Parser 12)] x)
+;)
+
+(defn parse [parser input] 
+  ((monad parser) input)
 )
 
 
-(defmacro parse [p i]
-  (list 'with-monad 'parser-m (list (list p) i))
-)
-
-
-
-(defn mytest [n] 
-  (parse body2 n)
-)
-
-(defn -main []
-  (println (mytest "ciao mondomondo"))
-)
+;(defn -main []
+;  (println (mytest "ciao mondomondo")))
