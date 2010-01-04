@@ -1,13 +1,17 @@
-(ns eu.dnetlib.dlms.ast)
+(ns eu.dnetlib.dlms.ast
+  (:import (eu.dnetlib.dlms.jdbc.ast 
+	    Assign BinaryPredicate Call DeclInit Expression Inst Lit NumberLit Predicate Ref RunExpr Select SimplePredicate StringLit Struct XPathComponent XPathExpr XPath 
+	    )))
+	    
 
 (defn make-number-lit [n]
-  {:type 'Lit :value n})
+  (new NumberLit n))
 
 (defn make-string-lit [n]
-  {:type 'Lit :value n})
+  (new StringLit n))
 
 (defn make-reference [n]
-  {:type 'Ref :name n})
+  (new Ref n))
 
 (defn make-struct-def [l v]
   {:type 'StructDef :label l :value v})

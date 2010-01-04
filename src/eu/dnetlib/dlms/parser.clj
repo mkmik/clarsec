@@ -1,5 +1,8 @@
 (ns eu.dnetlib.dlms.parser
-  (:gen-class)
+  (:gen-class
+   :name eu.dnetlib.dlms.ClojureDQLParser
+   :implements [eu.dnetlib.dlms.jdbc.parser.IDQLParser]
+   )
   (:use [eu.dnetlib.clojure.clarsec]
 	[eu.dnetlib.dlms.ast]
 	[eu.dnetlib.clojure.monad])
@@ -116,3 +119,6 @@
 
 (defn -main []
   (println (parse source "1")))
+
+(defn -parse [strn]
+  (:value (parse source strn)))
