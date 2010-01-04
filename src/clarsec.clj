@@ -12,7 +12,7 @@
 			     :value value
 			     :rest rest})
 
-
+(defn failback [v f] (if (nil? v) f v))
 
 
 (declare Parser)
@@ -27,7 +27,6 @@
 
 (defmethod bind 'Parser
   [m func] 
-;  (println "binding" m)
   (make-monad (monad-type m) 
 	      (fn [strn] 
 		(let [parser (monad m)
@@ -38,6 +37,19 @@
 		    )
 		  )
 		)))
+
+(defn result [v] (return 'Parser v))
+
+
+(defn <|> [& parsers]
+  (make-monad 'Parser
+	      (fn opt-plus [strn]
+		(failback
+		 (first
+		  (drop-while failed?
+			      (map #((monad %) strn) parsers)))
+		 (failed)
+		 ))))
 
 ;;
 
@@ -51,11 +63,34 @@
 		)
 	      ))
 
-(def fail-char
-     (make-monad 'Parser 
-		 (fn p-fail-char [strn]
-		   (failed))))
-  
+
+(def fail
+     (make-monad 'Parser (fn p-fail [strn] (failed))))
+
+(defn satisfy [pred]
+     (let-bind [c any-char]
+	       (if (pred c) (result c) fail)
+     ))
+
+(defn optional [p]
+  (<|> p (result nil)))
+
+(defn string [strn]
+  (let-bind [x (m-sequence (map is-char strn))]
+	    (result (apply str x))))
+
+
+(defn is-char [c]
+  (satisfy (partial = c)))
+
+(def letter
+  (satisfy #(. Character isLetter %)))
+
+(def digit
+  (satisfy #(. Character isDigit %)))
+
+
+
 
 ;(def myparser 
 ;     (let-bind [x (return 'Parser 12)] x)
