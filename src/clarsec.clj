@@ -60,9 +60,9 @@
   (bind p #(result (f %))))
 ;;
 
-(def any-char
+(def anyToken
   (make-monad 'Parser
-	      (fn p-any-char [strn]
+	      (fn p-anyToken [strn]
 		(if (= "" strn)
 		  (failed)
 		  (consumed (first strn)
@@ -75,7 +75,7 @@
      (make-monad 'Parser (fn p-fail [strn] (failed))))
 
 (defn satisfy [pred]
-     (let-bind [c any-char]
+     (let-bind [c anyToken]
 	       (if (pred c) (result c) fail)
      ))
 
