@@ -24,7 +24,7 @@
 ; this hack shouldn't be necessary but I was in a hurry 
 ; the correct solution is to perform the delay forcing within the monadic operators 
 
-(clojure.core/ns monad
+(clojure.core/ns eu.dnetlib.clojure.monad
   (:use
      [clojure.contrib.def :only (defstruct-)]))
 

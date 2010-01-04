@@ -1,6 +1,6 @@
-(ns clarsec
+(ns eu.dnetlib.clojure.clarsec
   (:gen-class)
-  (:use [monad]))
+  (:use [eu.dnetlib.clojure.monad]))
 
 
 (defn consumed? [x]  (= (x :type) :consumed)) 

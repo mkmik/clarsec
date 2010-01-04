@@ -1,4 +1,4 @@
-(ns doroty
+(ns eu.dnetlib.dlms.parser
   (:gen-class)
   (:use [clarsec]
 	[ast]

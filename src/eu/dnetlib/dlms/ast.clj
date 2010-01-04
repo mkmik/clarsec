@@ -1,4 +1,4 @@
-(ns ast)
+(ns eu.dnetlib.dlms.ast)
 
 (defn make-number-lit [n]
   {:type 'Lit :value n})
