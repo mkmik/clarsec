@@ -54,6 +54,10 @@
   (bind p1 (fn [_] p2)))
 
 (def either <|>)
+
+; bind with a non monadic function
+(defn >>== [p f]
+  (bind p #(result (f %))))
 ;;
 
 (def any-char
@@ -84,15 +88,19 @@
 (defn optional [p]
   (<|> p (result nil)))
 
+;(defn string [strn]
+;  (let-bind [x (m-sequence (map is-char strn))]
+;	    (result (apply str x))))
+
 (defn string [strn]
-  (let-bind [x (m-sequence (map is-char strn))]
-	    (result (apply str x))))
+  (>>== (m-sequence (map is-char strn))
+	 #(apply str %)))
 
 (def many1)
 
 (defn many [parser]
-      (let-bind [res (optional (many1 parser))]
-	(result (if (nil? res) () res))))
+      (>>== (optional (many1 parser))
+	    #(if (nil? %) () %)))
 
 (defn many1 [parser]
       (let-bind
@@ -118,7 +126,11 @@
 
 (defn sepBy [p sep]
   (either (sepBy1 p sep) (result ())))
-	     
+
+(defn followedBy [p sep]
+  (let-bind [r p
+	     _ sep]
+	    (result r)))
 
 
 (def letter
@@ -142,7 +154,7 @@
 (defn symb [name]
   (lexeme (string name)))
 
-(def semicolon (symb ";"))
+(def semi (symb ";"))
 (def comma (symb ","))
 
 ; convert the result of a parse to a string, if its a list then concatenates the list
@@ -155,8 +167,8 @@
 		    (result (apply str (cons c cs))))))
 
 (def natural
-     (lexeme (let-bind [n (stringify (many digit))]
-		       (result (new Integer n)))))
+     (lexeme (>>== (stringify (many digit))
+		   #(new Integer %))))
 
 
 (defn between [open close p]
