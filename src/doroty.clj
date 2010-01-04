@@ -17,8 +17,8 @@
 
 (def structureDef
      (let-bind [label identifier
-		_ (symb "=")
-		val expression]
+		_     (symb "=")
+		val   expression]
 	       (result (make-struct-def label val))))
 
 (def structure 
@@ -27,7 +27,14 @@
 (def literal
      (either structure number stringLit reference))
      
+(def argList
+     (sepBy expression comma))
 
+(def instantiation
+     (let-bind [_      (symb "new")
+		set    identifier
+		args   (parens argList)]
+	       (result (make-instantiation set args))))
 
 
 (def predecl
@@ -37,7 +44,7 @@
      (string "ugo"))
 
 (def expression
-     literal)
+     (either instantiation literal))
 
 
 (def statement 

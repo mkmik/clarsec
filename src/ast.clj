@@ -11,3 +11,6 @@
 
 (defn make-struct-def [l v]
   {:type 'StructDef :label l :value v})
+
+(defn make-instantiation [set args]
+  {:type 'Inst :set set :args args})
