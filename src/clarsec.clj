@@ -1,7 +1,6 @@
 (ns clarsec
   (:gen-class)
-  (:use [monad]
-	[de.kotka.monad]))
+  (:use [de.kotka.monad]))
 
 
 (defn consumed? [x]  (= (x :type) :consumed)) 
@@ -51,6 +50,10 @@
 		 (failed)
 		 ))))
 
+(defn >> [p1 p2]
+  (bind p1 (fn [_] p2)))
+
+(def either <|>)
 ;;
 
 (def any-char
@@ -72,6 +75,9 @@
 	       (if (pred c) (result c) fail)
      ))
 
+(defn is-char [c]
+  (satisfy (partial = c)))
+
 (defn optional [p]
   (<|> p (result nil)))
 
@@ -83,7 +89,6 @@
 
 (defn many [parser]
       (let-bind [res (optional (many1 parser))]
-	(println "MANY GOT" res)
 	(result (if (nil? res) () res))))
 
 (defn many1 [parser]
@@ -92,9 +97,26 @@
                 as (many parser)]
                (result (concat [a] as))))
 
+(defn endByM [f p sep]
+  (f (let-bind [r p
+		_ sep]
+	       (result r))))
 
-(defn is-char [c]
-  (satisfy (partial = c)))
+(defn endBy [p sep]
+  (endByM many p sep))
+
+(defn endBy1 [p sep]
+  (endByM many1 p sep))
+
+(defn sepBy1 [p sep]
+  (let-bind [x p
+	     xs (many (>> sep p))]
+	    (result (cons x xs))))
+
+(defn sepBy [p sep]
+  (either (sepBy1 p sep) (result ())))
+	     
+
 
 (def letter
   (satisfy #(. Character isLetter %)))
@@ -102,12 +124,24 @@
 (def digit
   (satisfy #(. Character isDigit %)))
 
+(defn one-of [target-strn]
+  (let [str-chars (into #{} target-strn)]
+    (satisfy #(contains? str-chars %))))
+
+(def space
+     (one-of " \n\t"))
+
+(def spaces (many space))
+
+(def semicolon (is-char \;))
+(def comma (is-char \,))
 
 
 
-;(def myparser 
-;     (let-bind [x (return 'Parser 12)] x)
-;)
+(def identifier
+  (let-bind [c  letter
+             cs (many (either letter digit))]
+    (result (apply str (cons c cs)))))
 
 (defn parse [parser input] 
   ((monad parser) input)
