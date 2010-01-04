@@ -95,6 +95,9 @@
 (defn optional [p]
   (<|> p (result nil)))
 
+(defn option [default p]
+  (<|> p (result default)))
+
 ;(defn string [strn]
 ;  (let-bind [x (m-sequence (map is-char strn))]
 ;	    (result (apply str x))))

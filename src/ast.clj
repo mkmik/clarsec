@@ -14,3 +14,24 @@
 
 (defn make-instantiation [set args]
   {:type 'Inst :set set :args args})
+
+(defn make-call [target method args]
+  {:type 'Call :target target :method method :args args})
+
+(defn make-select [fields xp]
+  {:type 'Select :fields fields :xpath xp})
+
+(defn make-xpath [comps]
+  {:type 'XPath :components comps})
+
+(defn make-tagexp [axis tag pred]
+  {:type 'XPathComponent :axis axis :tag tag :pred pred})
+
+(defn make-simple-predicate [xp]
+  {:type 'SimplePredicate :xpath xp})
+
+(defn make-binary-predicate [op xp expr]
+  {:type 'BinaryPredicate :op op :xpath xp :expression expr})
+
+(defn make-xpath-expression [ex]
+  {:type 'XPathPredicate :expression ex})
