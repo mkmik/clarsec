@@ -82,20 +82,19 @@
 
 (def predicate (delay (either binaryPredicate (>>== xpath make-simple-predicate))))
 
+(def tagexp
+     (delay
+      (let-bind [axis (optional (followedBy identifier (symb "::")))
+		 tag  tagname
+		 pred (optional (brackets predicate))]
+		(result (make-tagexp axis tag pred)))))
+
+
 (def xpath
      (delay
-      (>>== (sepBy (let-bind [axis (optional (followedBy identifier (symb "::")))
-		tag  tagname
-		pred (optional (brackets predicate))]
-	       (result (make-tagexp axis tag pred))) (string "/"))
+      (>>== (sepBy tagexp (symb "/"))
 	    make-xpath)))
 
-
-;(def tagexp
-;     (let-bind [axis (optional (followedBy identifier (symb "::")))
-;		tag  tagname
-;		pred (optional (brackets predicate))]
-;	       (result (make-tagexp axis tag pred))))
 
 (def fieldList
      (sepBy identifier comma))
