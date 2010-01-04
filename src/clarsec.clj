@@ -79,6 +79,19 @@
   (let-bind [x (m-sequence (map is-char strn))]
 	    (result (apply str x))))
 
+(def many1)
+
+(defn many [parser]
+      (let-bind [res (optional (many1 parser))]
+	(println "MANY GOT" res)
+	(result (if (nil? res) () res))))
+
+(defn many1 [parser]
+      (let-bind
+               [a parser
+                as (many parser)]
+               (result (concat [a] as))))
+
 
 (defn is-char [c]
   (satisfy (partial = c)))
