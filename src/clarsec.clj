@@ -145,12 +145,19 @@
 (def semicolon (symb ";"))
 (def comma (symb ","))
 
-
+; convert the result of a parse to a string, if its a list then concatenates the list
+(defn stringify [p]
+  (bind p #(result (if (seq? %) (apply str %) (str %)))))
 
 (def identifier
-  (let-bind [c  letter
-             cs (many (either letter digit))]
-    (result (apply str (cons c cs)))))
+  (lexeme (let-bind [c  letter
+		     cs (many (either letter digit))]
+		    (result (apply str (cons c cs))))))
+
+(def natural
+     (lexeme (let-bind [n (stringify (many digit))]
+		       (result (new Integer n)))))
+
 
 (defn between [open close p]
   (let-bind [_ open
@@ -159,8 +166,7 @@
 	    (result x)))
 
 (def stringLiteral
-     (let-bind [x (lexeme (between (is-char \") (is-char \") (many (not-char \"))))]
-	       (result (apply str x))))
+     (stringify (lexeme (between (is-char \") (is-char \") (many (not-char \"))))))
 
 (defn parse [parser input] 
   ((monad parser) input)
