@@ -78,6 +78,9 @@
 (defn is-char [c]
   (satisfy (partial = c)))
 
+(defn not-char [c]
+  (satisfy #(not (= c %))))
+
 (defn optional [p]
   (<|> p (result nil)))
 
@@ -133,8 +136,14 @@
 
 (def spaces (many space))
 
-(def semicolon (is-char \;))
-(def comma (is-char \,))
+(defn lexeme [p]
+  (>> spaces p))
+
+(defn symb [name]
+  (lexeme (string name)))
+
+(def semicolon (symb ";"))
+(def comma (symb ","))
 
 
 
@@ -142,6 +151,16 @@
   (let-bind [c  letter
              cs (many (either letter digit))]
     (result (apply str (cons c cs)))))
+
+(defn between [open close p]
+  (let-bind [_ open
+	     x p
+	     _ close]
+	    (result x)))
+
+(def stringLiteral
+     (let-bind [x (lexeme (between (is-char \") (is-char \") (many (not-char \"))))]
+	       (result (apply str x))))
 
 (defn parse [parser input] 
   ((monad parser) input)
