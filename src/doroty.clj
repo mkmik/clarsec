@@ -2,7 +2,7 @@
   (:gen-class)
   (:use [clarsec]
 	[ast]
-	[de.kotka.monad])
+	[monad])
 )
 
 (declare instantiation invocation literal)
@@ -33,20 +33,20 @@
 (def literal
      (either structure number stringLit reference))
      
-;(def argList
-;     (sepBy expression comma))
+(def argList
+     (delay (sepBy expression comma)))
 
 (def instantiation
      (let-bind [_      (symb "new")
 		set    identifier
-		args   (parens (sepBy expression comma))]
+		args   (parens argList)]
 	       (result (make-instantiation set args))))
 
 (def invocation
      (let-bind [target identifier
 		_      (string ".")
 		method identifier
-		args  (parens (sepBy expression comma))]
+		args  (parens argList)]
 		(result (make-call target method args))))
 
 

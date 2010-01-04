@@ -1,6 +1,6 @@
 (ns clarsec
   (:gen-class)
-  (:use [de.kotka.monad]))
+  (:use [monad]))
 
 
 (defn consumed? [x]  (= (x :type) :consumed)) 
