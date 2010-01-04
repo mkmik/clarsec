@@ -1,8 +1,8 @@
 (ns eu.dnetlib.dlms.parser
   (:gen-class)
-  (:use [clarsec]
-	[ast]
-	[monad])
+  (:use [eu.dnetlib.clojure.clarsec]
+	[eu.dnetlib.dlms.ast]
+	[eu.dnetlib.clojure.monad])
 )
 
 (declare instantiation invocation literal)
