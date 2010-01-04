@@ -70,6 +70,13 @@
 		)
 	      ))
 
+(def eof 
+     (make-monad 'Parser
+		 (fn p-eof [strn]
+		   (if (= "" strn)
+		     (consumed "" "")
+		     (failed)
+		     ))))
 
 (def fail
      (make-monad 'Parser (fn p-fail [strn] (failed))))
@@ -167,7 +174,7 @@
 		    (result (apply str (cons c cs))))))
 
 (def natural
-     (lexeme (>>== (stringify (many digit))
+     (lexeme (>>== (stringify (many1 digit))
 		   #(new Integer %))))
 
 
@@ -176,6 +183,13 @@
 	     x p
 	     _ close]
 	    (result x)))
+
+(defn parens [p]
+     (between (symb "(") (symb ")") p))
+
+(defn brackets [p]
+     (between (symb "[") (symb "]") p))
+
 
 (def stringLiteral
      (stringify (lexeme (between (is-char \") (is-char \") (many (not-char \"))))))
