@@ -25,17 +25,19 @@
  
 
 (defmethod bind 'Parser
-  [m func] 
-  (make-monad (monad-type m) 
-	      (fn [strn] 
-		(let [parser (monad m)
-		      result (parser strn)]		  
-		  (if (consumed? result)
-		    ((monad (func (:value result))) (:rest result))
-		    result
+  [dm dfunc]
+  (let [m (force dm)
+	func (force dfunc)]
+    (make-monad (monad-type m)
+		(fn [strn]
+		  (let [parser (monad m)
+			result (parser strn)]
+		    (if (consumed? result)
+		      ((force (monad (force (func (:value result))))) (:rest result))
+		      result
+		      )
 		    )
-		  )
-		)))
+		  ))))
 
 (defn result [v] (return 'Parser v))
 
@@ -46,7 +48,7 @@
 		(failback
 		 (first
 		  (drop-while failed?
-			      (map #((monad %) strn) parsers)))
+			      (map #((monad (force %)) strn) parsers)))
 		 (failed)
 		 ))))
 
@@ -198,9 +200,9 @@
      (stringify (lexeme (between (is-char \") (is-char \") (many (not-char \"))))))
 
 (defn parse [parser input] 
-  ((monad parser) input)
+  ((monad (force parser)) input)
 )
 
 
 ;(defn -main []
-;  (println (mytest "ciao mondomondo")))
+;  (println (parse (>> (delay letter) (delay letter)) "ca.")))

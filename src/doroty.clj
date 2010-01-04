@@ -5,6 +5,12 @@
 	[de.kotka.monad])
 )
 
+(declare instantiation invocation literal)
+(declare xpath)
+
+
+(def expression
+     (delay (either instantiation invocation literal)))
 
 (def stringLit
      (>>== stringLiteral make-string-lit))
@@ -27,20 +33,20 @@
 (def literal
      (either structure number stringLit reference))
      
-(def argList
-     (sepBy expression comma))
+;(def argList
+;     (sepBy expression comma))
 
 (def instantiation
      (let-bind [_      (symb "new")
 		set    identifier
-		args   (parens argList)]
+		args   (parens (sepBy expression comma))]
 	       (result (make-instantiation set args))))
 
 (def invocation
      (let-bind [target identifier
 		_      (string ".")
 		method identifier
-		args  (parens argList)]
+		args  (parens (sepBy expression comma))]
 		(result (make-call target method args))))
 
 
@@ -66,23 +72,30 @@
 				name (either identifier (symb "*"))]
 			       (result (str attr name)))))
 
+
 (def binaryPredicate
-     (let-bind [xp xpath
-		op (symb "=")
-		expr (either (>>== expression make-xpath-expression) xpath)]
-	       (result (make-binary-predicate op xp expr))))
+     (delay
+      (let-bind [xp xpath
+		 op (symb "=")
+		 expr (either (>>== expression make-xpath-expression) xpath)]
+		(result (make-binary-predicate op xp expr)))))
 
-(def predicate (either binaryPredicate (>>== xpath make-simple-predicate)))
-
-(def tagexp
-     (let-bind [axis (optional (followedBy identifier (symb "::")))
-		tag  tagname
-		pred (optional (brackets predicate))]
-	       (result (make-tagexp axis tag pred))))
+(def predicate (delay (either binaryPredicate (>>== xpath make-simple-predicate))))
 
 (def xpath
-     (>>== (sepBy tagexp (string "/"))
-	   make-xpath))
+     (delay
+      (>>== (sepBy (let-bind [axis (optional (followedBy identifier (symb "::")))
+		tag  tagname
+		pred (optional (brackets predicate))]
+	       (result (make-tagexp axis tag pred))) (string "/"))
+	    make-xpath)))
+
+
+;(def tagexp
+;     (let-bind [axis (optional (followedBy identifier (symb "::")))
+;		tag  tagname
+;		pred (optional (brackets predicate))]
+;	       (result (make-tagexp axis tag pred))))
 
 (def fieldList
      (sepBy identifier comma))
@@ -93,16 +106,14 @@
 		xp     xpath]
 	       (result (make-select fields xp))))
 
-
-(def expression
-     (either instantiation invocation literal))
-
-
 (def statement 
      (either predecl select expression))
 
 (def body 
-     (endBy statement semi))
+     (followedBy (sepBy1 statement semi) (optional semi)))
 
 (def source
      (followedBy body (lexeme eof)))
+
+(defn -main []
+  (println (parse source "1")))
