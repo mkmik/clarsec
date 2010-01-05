@@ -8,7 +8,7 @@
 	[eu.dnetlib.clojure.monad])
 )
 
-(declare instantiation invocation literal)
+(declare instantiation invocation literal reference parameter)
 (declare xpath)
 
 
@@ -16,7 +16,9 @@
      (delay (either
 	     instantiation
 	     invocation
-	     literal)))
+	     literal
+	     reference
+	     parameter)))
 
 (def stringLit
      (>>== stringLiteral make-string-lit))
@@ -26,6 +28,9 @@
 
 (def reference 
      (>>== identifier make-reference))
+
+(def parameter
+     (>>== (>> (symb ":") baseIdentifier) make-parameter))
 
 (def structureDef
      (let-bind [label identifier
@@ -38,7 +43,7 @@
 	   make-struct))
 
 (def literal
-     (either structure number stringLit reference))
+     (either structure number stringLit))
      
 (def argList
      (delay (sepBy expression comma)))
@@ -74,10 +79,11 @@
 
 
 
-(def tagname (either (symb ".")
-		     (let-bind [attr (option "" (string "@"))
-				name (either identifier (symb "*"))]
-			       (result (str attr name)))))
+(def tagname (lexeme (either (symb ".")
+			      (let-bind [attr (option "" (string "@"))
+					 ns   (option "" (stringify (m-sequence [baseIdentifier (string ":")])))
+					 name (either baseIdentifier (symb "*"))]
+					(result (str attr ns name))))))
 
 
 (def binaryPredicate

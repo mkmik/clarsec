@@ -170,10 +170,13 @@
 (defn stringify [p]
   (bind p #(result (if (seq? %) (apply str %) (str %)))))
 
+(def baseIdentifier
+     (let-bind [c  letter
+		cs (many (either letter digit))]
+	       (result (apply str (cons c cs)))))
+
 (def identifier
-  (lexeme (let-bind [c  letter
-		     cs (many (either letter digit))]
-		    (result (apply str (cons c cs))))))
+  (lexeme baseIdentifier))
 
 (def natural
      (lexeme (>>== (stringify (many1 digit))
