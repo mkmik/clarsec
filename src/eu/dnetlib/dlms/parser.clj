@@ -13,7 +13,10 @@
 
 
 (def expression
-     (delay (either instantiation invocation literal)))
+     (delay (either
+	     instantiation
+	     invocation
+	     literal)))
 
 (def stringLit
      (>>== stringLiteral make-string-lit))
@@ -31,7 +34,8 @@
 	       (result (make-struct-def label val))))
 
 (def structure 
-     (brackets (sepBy structureDef comma)))
+     (>>== (brackets (sepBy structureDef comma))
+	   make-struct))
 
 (def literal
      (either structure number stringLit reference))
@@ -80,7 +84,7 @@
      (delay
       (let-bind [xp xpath
 		 op (symb "=")
-		 expr (either (>>== expression make-xpath-expression) xpath)]
+		 expr (either xpath (>>== expression make-xpath-expression))]
 		(result (make-binary-predicate op xp expr)))))
 
 (def predicate (delay (either binaryPredicate (>>== xpath make-simple-predicate))))
@@ -109,7 +113,9 @@
 	       (result (make-select fields xp))))
 
 (def statement 
-     (either predecl select expression))
+     (either predecl
+	     select
+	     (>>== expression make-run-expr)))
 
 (def body 
      (followedBy (sepBy1 statement semi) (optional semi)))
@@ -120,5 +126,5 @@
 (defn -main []
   (println (parse source "1")))
 
-(defn -parse [strn]
+(defn -parse [this strn]
   (:value (parse source strn)))

@@ -1,8 +1,11 @@
 (ns eu.dnetlib.dlms.ast
   (:import (eu.dnetlib.dlms.jdbc.ast 
-	    Assign BinaryPredicate Call DeclInit Expression Inst Lit NumberLit Predicate Ref RunExpr Select SimplePredicate StringLit Struct XPathComponent XPathExpr XPath 
+	    Assign BinaryPredicate Call DeclInit Expression Inst Lit NumberLit Predicate Ref RunExpr Select SimplePredicate StringLit Struct 
+	    StructKeyValue XPathComponent XPathExpr XPath
 	    )))
 	    
+(defn make-run-expr [e]
+  (new RunExpr e))
 
 (defn make-number-lit [n]
   (new NumberLit n))
@@ -13,35 +16,38 @@
 (defn make-reference [n]
   (new Ref n))
 
+(defn make-struct [defs]
+  (new Struct defs))
+
 (defn make-struct-def [l v]
-  {:type 'StructDef :label l :value v})
+  (new StructKeyValue l v))
 
 (defn make-instantiation [set args]
-  {:type 'Inst :set set :args args})
+  (new Inst set args))
 
 (defn make-call [target method args]
-  {:type 'Call :target target :method method :args args})
+  (new Call target method args))
 
 (defn make-select [fields xp]
-  {:type 'Select :fields fields :xpath xp})
+  (new Select fields xp))
 
 (defn make-xpath [comps]
-  {:type 'XPath :components comps})
+  (new XPath comps))
 
 (defn make-tagexp [axis tag pred]
-  {:type 'XPathComponent :axis axis :tag tag :pred pred})
+  (new XPathComponent tag pred axis))
 
 (defn make-simple-predicate [xp]
-  {:type 'SimplePredicate :xpath xp})
+  (new SimplePredicate xp))
 
 (defn make-binary-predicate [op xp expr]
-  {:type 'BinaryPredicate :op op :xpath xp :expression expr})
+  (new BinaryPredicate op xp expr))
 
 (defn make-xpath-expression [ex]
-  {:type 'XPathPredicate :expression ex})
+  (new XPathExpr ex))
 
 (defn make-decl-init [typ name e]
-  {:type 'DeclInit :type typ :name name :expression e})
+  (new DeclInit typ name e))
 
 (defn make-assign [name e]
-  {:type 'Assign :name name :expression e})
+  (new Assign name e))
