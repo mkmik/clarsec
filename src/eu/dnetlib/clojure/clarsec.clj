@@ -194,6 +194,9 @@
 
 (defn brackets [p]
      (between (symb "[") (symb "]") p))
+     
+(defn braces [p]
+     (between (symb "{") (symb "}") p))
 
 
 (def stringLiteral

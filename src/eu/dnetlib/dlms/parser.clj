@@ -32,8 +32,14 @@
 (def parameter
      (>>== (>> (symb ":") baseIdentifier) make-parameter))
 
+(def baseLabel
+     (either (stringify (m-sequence [baseIdentifier (string ":") baseIdentifier]))
+	     baseIdentifier))
+
+(def label (lexeme baseLabel))
+
 (def structureDef
-     (let-bind [label identifier
+     (let-bind [label label
 		_     (symb "=")
 		val   expression]
 	       (result (make-struct-def label val))))
@@ -42,8 +48,13 @@
      (>>== (brackets (sepBy structureDef comma))
 	   make-struct))
 
+(def collection
+     (delay 
+      (>>== (braces (sepBy expression comma))
+	    make-struct)))
+
 (def literal
-     (either structure number stringLit))
+     (either collection structure number stringLit))
      
 (def argList
      (delay (sepBy expression comma)))
@@ -77,14 +88,8 @@
      (let-bind [name identifier]
 	       (either (decl name) (assign name))))
 
-
-
 (def tagname (lexeme (either (symb ".")
-			      (let-bind [attr (option "" (string "@"))
-					 ns   (option "" (stringify (m-sequence [baseIdentifier (string ":")])))
-					 name (either baseIdentifier (symb "*"))]
-					(result (str attr ns name))))))
-
+			     (stringify (m-sequence [(optional (string "@")) baseLabel])))))
 
 (def binaryPredicate
      (delay

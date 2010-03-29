@@ -1,7 +1,7 @@
 (ns eu.dnetlib.dlms.ast
   (:import (eu.dnetlib.dlms.jdbc.ast 
 	    Assign BinaryPredicate Call DeclInit Expression Inst Lit NumberLit Predicate Ref RunExpr Select SimplePredicate StringLit Struct 
-	    StructKeyValue XPathComponent XPathExpr XPath Parameter
+	    StructKeyValue XPathComponent XPathExpr XPath Parameter CollectionNode
 	    )))
 	    
 (defn make-run-expr [e]
@@ -18,6 +18,9 @@
 
 (defn make-parameter [n]
   (new Parameter n))
+
+(defn make-collection [values]
+  (new CollectionNode values))
 
 (defn make-struct [defs]
   (new Struct defs))
