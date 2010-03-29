@@ -153,7 +153,7 @@
     (satisfy #(contains? str-chars %))))
 
 (def space
-     (one-of " \n\t"))
+     (one-of " \r\n\t"))
 
 (def spaces (many space))
 
