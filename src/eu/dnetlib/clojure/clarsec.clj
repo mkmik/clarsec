@@ -48,9 +48,7 @@
   (make-monad 'Parser
               (fn opt-plus [strn]
                 (failback
-                 (first
-                  (drop-while failed?
-                              (map #((monad (force %)) strn) parsers)))
+                 (first (drop-while failed? (map #((monad (force %)) strn) parsers)))
                  (failed)))))
 
 (defn >> [p1 p2]
@@ -107,15 +105,14 @@
         #(if (nil? %) () %)))
 
 (defn many1 [parser]
-  (let-bind
-   [a parser
-    as (many parser)]
-   (result (concat [a] as))))
+  (let-bind [a parser
+             as (many parser)]
+    (result (concat [a] as))))
 
 (defn end-by-m [f p sep]
   (f (let-bind [r p
                 _ sep]
-               (result r))))
+       (result r))))
 
 (defn end-by [p sep]
   (end-by-m many p sep))
