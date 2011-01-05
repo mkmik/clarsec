@@ -1,32 +1,31 @@
-;-
-; Copyright 2008 (c) Meikel Brandmeyer.
-; All rights reserved.
-;
-; Permission is hereby granted, free of charge, to any person obtaining a copy
-; of this software and associated documentation files (the "Software"), to deal
-; in the Software without restriction, including without limitation the rights
-; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-; copies of the Software, and to permit persons to whom the Software is
-; furnished to do so, subject to the following conditions:
-;
-; The above copyright notice and this permission notice shall be included in
-; all copies or substantial portions of the Software.
-;
-; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-; THE SOFTWARE.
+;;-
+;; Copyright 2008 (c) Meikel Brandmeyer.
+;; All rights reserved.
+;;
+;; Permission is hereby granted, free of charge, to any person obtaining a copy
+;; of this software and associated documentation files (the "Software"), to deal
+;; in the Software without restriction, including without limitation the rights
+;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+;; copies of the Software, and to permit persons to whom the Software is
+;; furnished to do so, subject to the following conditions:
+;;
+;; The above copyright notice and this permission notice shall be included in
+;; all copies or substantial portions of the Software.
+;;
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY
+;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM
+;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+;; THE SOFTWARE.
 
-; this is a slightly patched version which accepts "Delay" objects is monadic objects
-; this hack shouldn't be necessary but I was in a hurry 
-; the correct solution is to perform the delay forcing within the monadic operators 
+;; this is a slightly patched version which accepts "Delay" objects is monadic objects
+;; this hack shouldn't be necessary but I was in a hurry
+;; the correct solution is to perform the delay forcing within the monadic operators
 
-(clojure.core/ns eu.dnetlib.clojure.monad
-  (:use
-     [clojure.contrib.def :only (defstruct-)]))
+(ns eu.dnetlib.clojure.monad
+  (:use [clojure.contrib.def :only (defstruct-)]))
 
 (declare Monad MZero MRunnable)
 
@@ -51,8 +50,7 @@
 
 (defmulti
   #^{:arglists '([monad-type monad-argument])
-     :doc
-  "Return a monad of the given type with the given argument."}
+     :doc "Return a monad of the given type with the given argument."}
   return
   (fn [t _] t))
 
@@ -61,8 +59,7 @@
   (make-monad t m))
 
 (defmulti
-  #^{:doc
-  "bind makes the value of the given monad available to a function.
+  #^{:doc "bind makes the value of the given monad available to a function.
   The function may act on the value, but it must return another monad.
   Although this cannot be enforced in Clojure."}
   bind (fn [m _] (monad-type (force m))))
@@ -71,9 +68,7 @@
 (defmethod bind `Monad [m f] (f (monad m)))
 
 (defmulti
-  #^{:doc
-  "If the first argument is not a `MZero, return it. Otherwise return
-  the second value."}
+  #^{:doc "If the first argument is not a `MZero, return it. Otherwise return the second value."}
   mplus
   (fn [m1 m2] #(vec (map monad-type [%1 %2]))))
 
@@ -99,7 +94,7 @@
   (let [f (fn [ms m]
             (let-bind [result  m
                        results ms]
-              (return (monad-type m) (conj results result))))]
+                      (return (monad-type m) (conj results result))))]
     (reduce f (return (-> monads first monad-type) nil) (reverse monads))))
 
 (defmacro lift-into
@@ -111,8 +106,7 @@
 
 (defmulti
   #^{:arglists '([monad & args])
-     :doc
-  "Applies the value of the given monad to the arguments and returns
+     :doc "Applies the value of the given monad to the arguments and returns
   the result. Not all monad types are `Runnable."}
   run
   (fn [m & _] (monad-type m)))
