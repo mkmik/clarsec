@@ -59,7 +59,8 @@
 ;; Bind with a non monadic function
 (defn >>== [p f]
   (bind p #(result (f %))))
-(def <$> >>==)
+(defn <$> [f p]
+  (bind p #(result (f %))))
 
 
 (def any-token
