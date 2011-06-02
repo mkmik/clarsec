@@ -104,7 +104,7 @@
 (def many1)
 
 (defn many [parser]
-  (>>== (optional (many1 parser))
+  (>>== (optional (delay (many1 parser)))
         #(if (nil? %) () %)))
 
 (defn many1 [parser]
