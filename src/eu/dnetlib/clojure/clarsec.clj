@@ -59,6 +59,9 @@
 ;; Bind with a non monadic function
 (defn >>== [p f]
   (bind p #(result (f %))))
+(defn <$> [f p]
+  (bind p #(result (f %))))
+
 
 (def any-token
      (make-monad 'Parser
@@ -101,7 +104,7 @@
 (def many1)
 
 (defn many [parser]
-  (>>== (optional (many1 parser))
+  (>>== (optional (delay (many1 parser)))
         #(if (nil? %) () %)))
 
 (defn many1 [parser]
