@@ -2,8 +2,8 @@
 
 clarsec is an attempt to port haskell parsec to clojure
 
-This library is inspired on http://kotka.de/projects/clojure/parser.html and uses the Meikel Brandmeyer's "monad" library (slightly adapted), as I didn't understand how the clojure contrib monad
-library works.
+This library is inspired on http://kotka.de/projects/clojure/parser.html and uses the Meikel Brandmeyer's "monad" library (slightly adapted), 
+as I didn't understand how the clojure contrib monad library works.
 
 ## Usage
 
@@ -27,17 +27,19 @@ however, clojures 'def' binding is strict and all the referenced vars have to be
 
 I'm a clojure newbie, so I don't know exactly how to avoid this. I know only of two workarounds:
 
- 1. use functions:   (defn structure [] (brackets (sepBy (structureDef) (comma))))
- 2. use delay:       (def structure (delay (brackets (sepBy structureDef comma))))
+1. use functions:   `(defn structure [] (brackets (sepBy (structureDef) (comma))))`
+2. use delay:       `(def structure (delay (brackets (sepBy structureDef comma))))`
 
-I opted for the "delay", as it allowed me to avoid all those spurious parens, and retain the illusion of a parser DSL, and put the "delay" only where needed. (or everywhere
+I opted for `delay`, as it allowed me to avoid all those spurious parens, and retain the illusion of a parser DSL, and put the "delay" only where needed. (or everywhere
 with a "defblabla" macro).
 
 Unfortunately this required a small patch to Brandmeyer's monad library.
 
 ## Installation
 
-leim jar
+```
+lein jar
+```
 
 ## License
 
